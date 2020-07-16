@@ -6,6 +6,9 @@ The tool monitors ping to the given ip (default 8.8.8.8) and detects changes in 
 
 When the ping changes state from ```not connected``` to ```connected``` it sends a telegram message to the configured chat ids using the telegram access token that you have created.
 
+## Pre-requisites
+1. Telegram python package [here](https://python-telegram-bot.org/)
+
 ## How to use?
 1. Copy ```config-template.json``` to ```~/.pinetmonitorconfig.json```
 2. Add the missing values to it.
