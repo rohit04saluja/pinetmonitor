@@ -20,7 +20,10 @@ class Ping :
             self.ttl = int(r.group(2))
             self.time = float(r.group(3))
         else :
-            self.stdout = out.stdout.decode('UTF-8').split('\n')[1]
+            try:
+                self.stdout = out.stdout.decode('UTF-8').split('\n')[1]
+            except IndexError :
+                self.stdout = out.stdout.decode('UTF-8')
         if self.stdout == "" :
             logging.debug(out.stdout.decode('UTF-8'))
 
