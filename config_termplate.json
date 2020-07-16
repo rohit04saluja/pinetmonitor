@@ -1,0 +1,12 @@
+{
+    "telegram": {
+        "access_token": "Your telegram bot access token goes here",
+        "chat_id": [
+            "Your chat id goes here"
+        ],
+        "messages": {
+            "up": "The up message goes here"
+        }
+    },
+    "export": "~/pinetmonitor.csv"
+}
