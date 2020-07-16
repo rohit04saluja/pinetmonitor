@@ -64,19 +64,26 @@ class PiNetMonitor :
                 p = Ping(dest)
                 print(p.stdout)
                 if (self.__config.export is not None) : self.__export(p)
-                if p.returncode == 0 and not connected :
-                    logging.warning("Change of state detected. It was not connected before")
-                    fail_retry = 0
-                    succ_retry = succ_retry + 1
-                    logging.debug("Success retry count is {}".format(succ_retry))
-                    # Send notification that the internet is back up
-                    if succ_retry > self.__config.succ_retry :
-                        succ_retry = 0
-                        logging.warning("Changing interval to {}s".format(self.__config.interval))
+
+                if p.returncode == 0 :
+                    if not connected :
+                        logging.warning("Change of state detected. It was not connected before")
+                        fail_retry = 0
+                        succ_retry = succ_retry + 1
+                        logging.debug("Success retry count is {}".format(succ_retry))
+                        # Send notification that the internet is back up
+                        if succ_retry > self.__config.succ_retry :
+                            succ_retry = 0
+                            logging.warning("Changing interval to {}s".format(self.__config.interval))
+                            self.interval = self.__config.interval
+                            connected = True
+                            self.__sendMessage(self.__config.telegram.messages["up"])
+                    elif fail_retry > 0 :
+                        # Reset interval time
                         self.interval = self.__config.interval
-                        connected = True
-                        self.__sendMessage(self.__config.telegram.messages["up"])
-                elif p.returncode != 0 and connected :
+                        fail_retry = 0
+
+                elif connected :
                     logging.warning("Change of state detected. It was connected before")
                     succ_retry = 0
                     fail_retry = fail_retry + 1
