@@ -143,5 +143,6 @@ class MyThread (threading.Thread) :
 if __name__ == "__main__":
     logging.debug('Entering main')
     MyThread(PiNetMonitor(), "PiNetMonitor").start()
+    time.speed(60)
     SpeedTest().run()
     logging.debug('Exiting main')
