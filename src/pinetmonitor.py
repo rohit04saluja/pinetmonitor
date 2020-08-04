@@ -2,9 +2,14 @@
 
 import logging
 import sys, time, subprocess, re, os
-from telegram.ext import Updater
+import threading
+from telegram.ext import (Updater, CommandHandler)
 from config import Config
 from datetime import datetime
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.debug("Logging initialized")
+
 
 '''Class for ping functionality'''
 class Ping :
@@ -29,8 +34,6 @@ class Ping :
 
 class PiNetMonitor :
     def __init__ (self) :
-        logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-        logging.debug("Logging initialized")
         self.__config = Config()
         logging.debug("Config initialized")
         self.interval = self.__config.interval
@@ -99,5 +102,46 @@ class PiNetMonitor :
             print("Good bye")
             sys.exit(0)
 
+class SpeedTest :
+    def __init__ (self) :
+        self.__config = Config()
+        logging.debug("Config initialized")
+
+    def __SpeedTest (self) :
+        logging.debug('Starting Speedtest now')
+        out = subprocess.run(["speedtest"], capture_output=True)
+        down = up = ''
+        for line in out.stdout.decode('UTF-8').split('\n') :
+            if re.search ('Download: .*', line) :
+                down = line.split(' ')[1]
+            if re.search ('Upload: .*', line) :
+                up = line.split(' ')[1]
+        return down, up
+
+    def __SpeedTestHandler (self, updater, context) :
+        down, up = self.__SpeedTest()
+        updater.message.reply_text('Down: {0} and Up: {1}'.format(down, up))
+
+    def run (self) :
+        updater = Updater(self.__config.telegram.access_token, use_context=True)
+        dp = updater.dispatcher
+        dp.add_handler(CommandHandler('speedtest', self.__SpeedTestHandler))
+        updater.start_polling()
+        updater.idle()
+
+class MyThread (threading.Thread) :
+    def __init__ (self, obj, name) :
+        threading.Thread.__init__(self)
+        self.__obj = obj
+        self.__name = name
+
+    def run(self) :
+        logging.info('Starting thread {0}'.format(self.__name))
+        self.__obj.run()
+        logging.info('Exiting thread {0}'.format(self.__name))
+
 if __name__ == "__main__":
-    PiNetMonitor().run()
+    logging.debug('Entering main')
+    MyThread(PiNetMonitor(), "PiNetMonitor").start()
+    SpeedTest().run()
+    logging.debug('Exiting main')
