@@ -119,8 +119,9 @@ class SpeedTest :
         return down, up
 
     def __SpeedTestHandler (self, updater, context) :
+        updater.message.reply_text('I am checking now')
         down, up = self.__SpeedTest()
-        updater.message.reply_text('Down: {0} and Up: {1}'.format(down, up))
+        updater.message.reply_text('Down is {0} and Up is {1}'.format(down, up))
 
     def run (self) :
         updater = Updater(self.__config.telegram.access_token, use_context=True)
